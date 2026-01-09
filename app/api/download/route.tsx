@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import getProducts from "../../utils/getProducts";
 import { getPayPalApiBase } from "../../utils/paypalConfig";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+let stripe: Stripe | null = null;
 
 /**
  * GET /api/download?payment_intent_id=xxx (for Stripe)
@@ -22,6 +22,9 @@ export async function GET(request: NextRequest) {
     // Verify Stripe payment
     if (paymentIntentId) {
       try {
+        if (!stripe) {
+          stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+        }
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
         // Check if payment succeeded
